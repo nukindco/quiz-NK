@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Marketing Readiness Assessment - NuKind Digital</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@400;600;700;800&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --nukind-orange: #F7931E;
+            --nukind-blue: #3B9CD9;
+            --nukind-light-blue: #6BC9E8;
+            --nukind-dark: #1A1A1A;
+            --primary-dark: #E08015;
+            --bg-light: #FAFAFA;
+            --bg-white: #FFFFFF;
+            --text-dark: #1A1A1A;
+            --text-medium: #4A4A4A;
+            --text-light: #8A8A8A;
+            --border: #E0E0E0;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #e8f0f7 100%);
+            color: var(--text-dark);
+            line-height: 1.6;
+            min-height: 100vh;
+            padding: 2rem 1rem;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        body::before, body::after {
+            content: '';
+            position: fixed;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        body::before {
+            top: -50%;
+            right: -50%;
+            background: radial-gradient(circle, rgba(247,147,30,0.08) 0%, transparent 70%);
+        }
+
+        body::after {
+            bottom: -50%;
+            left: -50%;
+            background: radial-gradient(circle, rgba(59,156,217,0.06) 0%, transparent 70%);
+        }
+
+        .container { max-width: 800px; margin: 0 auto; position: relative; z-index: 1; }
+        .quiz-header { text-align: center; margin-bottom: 3rem; animation: fadeInDown 0.8s ease-out; }
+        .nukind-logo { display: inline-flex; align-items: center; gap: 0.75rem; margin-bottom: 1.5rem; }
+        .logo-icon { display: grid; grid-template-columns: repeat(2, 1fr); gap: 4px; width: 40px; height: 40px; }
+        .logo-dot { width: 16px; height: 16px; border-radius: 50%; }
+        .logo-dot:nth-child(1), .logo-dot:nth-child(4) { background: var(--nukind-orange); }
+        .logo-dot:nth-child(2) { background: var(--nukind-blue); }
+        .logo-dot:nth-child(3) { background: var(--nukind-light-blue); }
+        .logo-text { text-align: left; }
+        .logo-text-main { font-family: 'Bricolage Grotesque', sans-serif; font-size: 1.8rem; font-weight: 700; letter-spacing: -0.02em; line-height: 1; }
+        .logo-text-sub { font-size: 0.65rem; font-weight: 600; color: var(--text-medium); letter-spacing: 0.15em; text-transform: uppercase; margin-top: 2px; }
+
+        .quiz-title { font-family: 'Bricolage Grotesque', sans-serif; font-size: clamp(1.6rem, 4vw, 2.5rem); font-weight: 800; margin-bottom: 0.5rem; letter-spacing: -0.03em; line-height: 1.2; }
+        .quiz-subtitle { font-size: clamp(0.95rem, 2.5vw, 1.1rem); color: var(--text-medium); }
+
+        .progress-container, .question-card, .result-card {
+            background: var(--bg-white);
+            border-radius: 24px;
+            border: 1px solid rgba(247,147,30,0.15);
+            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+        }
+
+        .progress-container { padding: 1.5rem; margin-bottom: 2rem; animation: fadeInUp 0.8s ease-out 0.2s both; }
+        .progress-bar-bg { width: 100%; height: 8px; background: var(--border); border-radius: 10px; overflow: hidden; margin-bottom: 0.75rem; }
+        .progress-bar { height: 100%; width: 0; background: linear-gradient(90deg, var(--nukind-orange), var(--nukind-light-blue), var(--nukind-blue)); background-size: 200% 100%; border-radius: 10px; transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1); animation: gradientSlide 3s ease infinite; }
+        .progress-text { font-size: 0.9rem; color: var(--text-medium); text-align: center; font-weight: 500; }
+
+        .question-card { padding: 2.5rem; margin-bottom: 2rem; animation: fadeInScale 0.6s ease-out; }
+        .question-number { font-size: 0.85rem; font-weight: 700; color: var(--nukind-orange); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 0.75rem; }
+        .question-text { font-family: 'Bricolage Grotesque', sans-serif; font-size: clamp(1.3rem, 3.5vw, 1.75rem); font-weight: 700; margin-bottom: 0.75rem; letter-spacing: -0.02em; line-height: 1.3; }
+        .question-context { font-size: 1rem; color: var(--text-medium); margin-bottom: 2rem; font-style: italic; padding-left: 1rem; border-left: 3px solid var(--nukind-blue); }
+
+        .options { display: flex; flex-direction: column; gap: 1rem; }
+        .option {
+            width: 100%;
+            text-align: left;
+            background: var(--bg-light);
+            border: 2px solid transparent;
+            border-radius: 16px;
+            padding: 1.25rem;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+            font: inherit;
+            color: inherit;
+        }
+        .option::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(247,147,30,0.1), transparent);
+            transition: left 0.5s;
+        }
+        .option:hover::before, .option:focus-visible::before { left: 100%; }
+        .option:hover, .option:focus-visible { border-color: var(--nukind-orange); background: var(--bg-white); transform: translateY(-2px); box-shadow: 0 6px 20px rgba(247,147,30,0.15); outline: none; }
+        .option.selected { border-color: var(--nukind-orange); background: linear-gradient(135deg, rgba(247,147,30,0.08) 0%, rgba(59,156,217,0.08) 100%); box-shadow: 0 6px 20px rgba(247,147,30,0.2); }
+
+        .option-label { font-size: clamp(1rem, 2.5vw, 1.1rem); font-weight: 600; display: flex; align-items: center; gap: 0.8rem; }
+        .option-radio { width: 24px; height: 24px; border: 2px solid var(--text-light); border-radius: 50%; flex-shrink: 0; display: flex; align-items: center; justify-content: center; transition: all 0.3s; }
+        .option.selected .option-radio { border-color: var(--nukind-orange); background: var(--nukind-orange); }
+        .option.selected .option-radio::after { content: '✓'; color: #fff; font-size: 0.9rem; font-weight: bold; }
+
+        .button-container { display: flex; gap: 1rem; margin-top: 2rem; }
+        .btn { flex: 1; padding: 1rem 1.5rem; border: none; border-radius: 12px; font-size: 0.95rem; font-weight: 700; cursor: pointer; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); font-family: 'DM Sans', sans-serif; text-transform: uppercase; letter-spacing: 0.05em; }
+        .btn-primary { background: linear-gradient(135deg, var(--nukind-orange) 0%, var(--primary-dark) 100%); color: white; box-shadow: 0 4px 15px rgba(247,147,30,0.3); }
+        .btn-primary:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 6px 25px rgba(247,147,30,0.4); }
+        .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; }
+        .btn-secondary { background: white; color: var(--text-dark); border: 2px solid var(--border); }
+        .btn-secondary:hover { border-color: var(--nukind-orange); background: var(--bg-light); }
+
+        .result-card { padding: 3rem; animation: fadeInScale 0.8s ease-out; }
+        .result-badge { display: inline-block; padding: 0.5rem 1.5rem; border-radius: 30px; font-size: 0.85rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 1.5rem; color: white; }
+        .result-badge.not-ready { background: linear-gradient(135deg, #E74C3C 0%, #C0392B 100%); }
+        .result-badge.package-1 { background: linear-gradient(135deg, var(--nukind-blue) 0%, #2980B9 100%); }
+        .result-badge.package-2 { background: linear-gradient(135deg, var(--nukind-orange) 0%, var(--primary-dark) 100%); }
+        .result-badge.package-3 { background: linear-gradient(135deg, #9B59B6 0%, #8E44AD 100%); }
+        .result-title { font-family: 'Bricolage Grotesque', sans-serif; font-size: clamp(1.6rem, 4vw, 2.5rem); font-weight: 800; margin-bottom: 1rem; letter-spacing: -0.03em; line-height: 1.2; }
+        .result-subtitle { font-size: clamp(1rem, 3vw, 1.3rem); color: var(--text-medium); margin-bottom: 2rem; font-weight: 500; }
+        .result-section { margin-bottom: 2rem; }
+        .result-section h3 { font-family: 'Bricolage Grotesque', sans-serif; font-size: clamp(1.2rem, 3vw, 1.5rem); font-weight: 700; margin-bottom: 1rem; }
+        .result-section p { color: var(--text-medium); margin-bottom: 1rem; line-height: 1.8; }
+        .result-features { display: grid; gap: 0.75rem; margin: 1.5rem 0; }
+        .feature-item { display: flex; align-items: flex-start; gap: 0.75rem; padding: 1rem; background: var(--bg-light); border-radius: 12px; border-left: 4px solid var(--nukind-orange); }
+        .feature-icon { color: var(--nukind-orange); font-weight: bold; flex-shrink: 0; }
+
+        .pricing-box { background: linear-gradient(135deg, rgba(247,147,30,0.08) 0%, rgba(59,156,217,0.08) 100%); border: 2px solid var(--nukind-orange); border-radius: 16px; padding: 1.25rem; margin: 2rem 0; }
+        .pricing-item { display: flex; justify-content: space-between; gap: 1rem; margin-bottom: 0.75rem; font-size: 1rem; flex-wrap: wrap; }
+        .pricing-value { font-weight: 700; color: var(--nukind-orange); }
+
+        .cta-button { display: inline-block; padding: 1rem 1.75rem; background: linear-gradient(135deg, var(--nukind-orange) 0%, var(--primary-dark) 100%); color: white; text-decoration: none; border-radius: 12px; font-weight: 700; font-size: 0.95rem; text-transform: uppercase; letter-spacing: 0.05em; box-shadow: 0 6px 25px rgba(247,147,30,0.3); transition: all 0.3s; margin-top: 1rem; }
+        .cta-button:hover { transform: translateY(-2px); box-shadow: 0 8px 30px rgba(247,147,30,0.4); }
+
+        .hidden { display: none; }
+
+        @keyframes gradientSlide { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
+        @keyframes fadeInDown { from { opacity: 0; transform: translateY(-20px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes fadeInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes fadeInScale { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
+
+        @media (max-width: 768px) {
+            body { padding: 1rem 0.75rem; }
+            .quiz-header { margin-bottom: 1.5rem; }
+            .question-card, .result-card, .progress-container { border-radius: 18px; }
+            .question-card, .result-card { padding: 1.25rem 1rem; }
+            .button-container { flex-direction: column; }
+            .logo-text-main { font-size: 1.4rem; }
+            .logo-icon { width: 34px; height: 34px; }
+            .logo-dot { width: 14px; height: 14px; }
+        }
+
+        @media (max-width: 420px) {
+            .option-label { align-items: flex-start; }
+            .btn, .cta-button { width: 100%; text-align: center; }
+            .pricing-item { flex-direction: column; gap: 0.2rem; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="quiz-header">
+            <div class="nukind-logo">
+                <div class="logo-icon">
+                    <div class="logo-dot"></div><div class="logo-dot"></div><div class="logo-dot"></div><div class="logo-dot"></div>
+                </div>
+                <div class="logo-text">
+                    <div class="logo-text-main">nukind</div>
+                    <div class="logo-text-sub">DIGITAL MARKETING</div>
+                </div>
+            </div>
+            <h1 class="quiz-title">Marketing Readiness Assessment</h1>
+            <p class="quiz-subtitle">Find out which marketing solution fits your business stage (3-4 min)</p>
+        </div>
+
+        <div class="progress-container" id="progressContainer">
+            <div class="progress-bar-bg"><div class="progress-bar" id="progressBar"></div></div>
+            <div class="progress-text" id="progressText">Question 1 of 9</div>
+        </div>
+
+        <div id="quizContainer"></div>
+        <div id="resultContainer" class="hidden"></div>
+    </div>
+
+    <script>
+        const quizData = [
+            { id: 1, question: "What's your business doing in monthly revenue right now?", context: "We need to understand if our services make financial sense for your business. Agencies like ours typically work best with businesses doing at least $20K+/month.", options: [ { text: "Under $10,000/month (we're just starting out)", value: "A", score: 0 }, { text: "$10,000 - $30,000/month (inconsistent, but growing)", value: "B", score: 1 }, { text: "$30,000 - $100,000/month (steady, ready to scale)", value: "C", score: 3 }, { text: "$100,000+/month (established, need systems)", value: "D", score: 5 } ], disqualifyIf: ["A"] },
+            { id: 2, question: "How quickly do you expect to see results from digital marketing?", context: "This helps us understand if your expectations align with how marketing actually works. SEO takes 6-12 months. Google Ads can work in weeks.", options: [ { text: "Within the first month (I need leads NOW)", value: "A", score: 0 }, { text: "2-3 months (I understand it takes time, but need SOME progress quickly)", value: "B", score: 2 }, { text: "6-12 months for full results (I'm playing the long game)", value: "C", score: 3 }, { text: "I don't know — that's why I need expert guidance", value: "D", score: 1 } ], disqualifyIf: ["A"] },
+            { id: 3, question: "What kind of commitment are you comfortable with?", context: "Marketing is an investment that compounds over time. We require minimum commitments because it protects both of us.", options: [ { text: "Month-to-month only (I want flexibility to cancel anytime)", value: "A", score: 0 }, { text: "3-month trial, then we'll see", value: "B", score: 1 }, { text: "6-month minimum (I understand SEO and systems take time)", value: "C", score: 3 }, { text: "12+ months (I'm ready to build a real marketing system)", value: "D", score: 5 } ], disqualifyIf: ["A"] },
+            { id: 4, question: "How many qualified leads are you getting per month right now?", context: "Be honest — we're talking about leads that actually have potential to become customers, not just tire-kickers.", options: [ { text: "0-5 leads/month (we're basically invisible)", value: "A", score: 0 }, { text: "5-15 leads/month (inconsistent, feast or famine)", value: "B", score: 1 }, { text: "15-30 leads/month (steady, but I want to scale)", value: "C", score: 2 }, { text: "30+ leads/month (we're maxed out, need better quality)", value: "D", score: 3 } ] },
+            { id: 5, question: "What have you already tried for marketing?", context: "We want to know what's worked, what hasn't, and where the gaps are.", options: [ { text: "Nothing really — we've been relying on referrals/word-of-mouth", value: "A", score: 0 }, { text: "DIY (tried Google Ads or SEO ourselves, got some results but couldn't scale)", value: "B", score: 1 }, { text: "Hired a freelancer/cheap agency (didn't work out, got burned)", value: "C", score: 2 }, { text: "Worked with agencies before, but looking for better results", value: "D", score: 3 } ] },
+            { id: 6, question: "When a lead comes in, what happens?", context: "This tells us if you're ready to handle MORE leads, or if we need to help you build follow-up systems first.", options: [ { text: "Honestly, we're not great at follow-up (leads fall through the cracks)", value: "A", score: 0 }, { text: "We respond within 24-48 hours (but no real system)", value: "B", score: 1 }, { text: "We have a solid follow-up process (CRM, email sequences, etc.)", value: "C", score: 2 }, { text: "We have a full sales team and process (we just need more volume)", value: "D", score: 3 } ] },
+            { id: 7, question: "If we could guarantee 20-30 qualified leads per month, what would that be worth to your business?", context: "Think about your average customer value and close rate. This helps us recommend the right level of investment.", options: [ { text: "Under $10,000/month in new revenue", value: "A", score: 0 }, { text: "$10,000 - $30,000/month in new revenue", value: "B", score: 1 }, { text: "$30,000 - $75,000/month in new revenue", value: "C", score: 2 }, { text: "$75,000+/month in new revenue (we have high LTV or volume)", value: "D", score: 3 } ] },
+            { id: 8, question: "What's your #1 marketing goal right now?", context: "", options: [ { text: "Get found locally (I need people in my area to discover us)", value: "A", score: 0 }, { text: "Generate consistent lead flow (stop the feast-or-famine cycle)", value: "B", score: 1 }, { text: "Scale revenue predictably (we're ready to invest and grow)", value: "C", score: 2 }, { text: "Dominate our market (I want to be #1 in our category)", value: "D", score: 3 } ] },
+            { id: 9, question: "What's your biggest concern about hiring an agency?", context: "", options: [ { text: "Wasting money with no results (been burned before)", value: "A", score: 0, objection: "results" }, { text: "Getting locked into a contract that doesn't work out", value: "B", score: 0, objection: "commitment" }, { text: "The agency won't understand my industry/business", value: "C", score: 0, objection: "understanding" }, { text: "I'm not sure if I can afford the right level of service", value: "D", score: 0, objection: "budget" } ] }
+        ];
+
+        let currentQuestion = 0;
+        const answers = [];
+        let userObjection = '';
+
+        function getTotalScore() {
+            return answers.reduce((sum, answer) => sum + (answer?.score || 0), 0);
+        }
+
+        function shouldEarlyDisqualify() {
+            const firstThree = quizData.slice(0, 3).map(q => answers.find(a => a?.questionId === q.id));
+            const hasDisqualifier = firstThree.some((answer, idx) => {
+                if (!answer) return false;
+                return quizData[idx].disqualifyIf?.includes(answer.selectedValue);
+            });
+            const subtotal = firstThree.reduce((sum, answer) => sum + (answer?.score || 0), 0);
+            return hasDisqualifier && subtotal < 4;
+        }
+
+        function initQuiz() {
+            renderQuestion();
+            updateProgress();
+        }
+
+        function renderQuestion() {
+            const question = quizData[currentQuestion];
+            const quizContainer = document.getElementById('quizContainer');
+            const selectedValue = answers[currentQuestion]?.selectedValue;
+
+            const contextHTML = question.context ? `<p class="question-context">${question.context}</p>` : '';
+            const optionsHTML = question.options.map((option, index) => {
+                const selectedClass = selectedValue === option.value ? 'selected' : '';
+                return `
+                    <button type="button" class="option ${selectedClass}" data-index="${index}" aria-pressed="${selectedClass ? 'true' : 'false'}" onclick="selectOption(${index})">
+                        <div class="option-label">
+                            <div class="option-radio" aria-hidden="true"></div>
+                            <span>${option.text}</span>
+                        </div>
+                    </button>
+                `;
+            }).join('');
+
+            quizContainer.innerHTML = `
+                <div class="question-card">
+                    <div class="question-number">Question ${currentQuestion + 1} of ${quizData.length}</div>
+                    <h2 class="question-text">${question.question}</h2>
+                    ${contextHTML}
+                    <div class="options" id="optionsContainer">${optionsHTML}</div>
+                    <div class="button-container">
+                        ${currentQuestion > 0 ? '<button class="btn btn-secondary" onclick="previousQuestion()">Back</button>' : ''}
+                        <button class="btn btn-primary" id="nextBtn" onclick="nextQuestion()" ${answers[currentQuestion] ? '' : 'disabled'}>
+                            ${currentQuestion === quizData.length - 1 ? 'See Results' : 'Next Question'}
+                        </button>
+                    </div>
+                </div>
+            `;
+        }
+
+        function selectOption(index) {
+            const options = document.querySelectorAll('.option');
+            options.forEach((opt, i) => {
+                const isSelected = i === index;
+                opt.classList.toggle('selected', isSelected);
+                opt.setAttribute('aria-pressed', isSelected ? 'true' : 'false');
+            });
+
+            const question = quizData[currentQuestion];
+            const selectedOption = question.options[index];
+
+            answers[currentQuestion] = {
+                questionId: question.id,
+                selectedValue: selectedOption.value,
+                selectedText: selectedOption.text,
+                score: selectedOption.score,
+                objection: selectedOption.objection || ''
+            };
+
+            if (question.id === 9) userObjection = selectedOption.objection || '';
+            document.getElementById('nextBtn').disabled = false;
+        }
+
+        function nextQuestion() {
+            if (!answers[currentQuestion]) return;
+
+            if (currentQuestion === 2 && shouldEarlyDisqualify()) {
+                showResult('not-ready');
+                return;
+            }
+
+            if (currentQuestion < quizData.length - 1) {
+                currentQuestion++;
+                renderQuestion();
+                updateProgress();
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+                return;
+            }
+
+            calculateResult();
+        }
+
+        function previousQuestion() {
+            if (currentQuestion === 0) return;
+            currentQuestion--;
+            renderQuestion();
+            updateProgress();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function updateProgress() {
+            const progress = ((currentQuestion + 1) / quizData.length) * 100;
+            document.getElementById('progressBar').style.width = `${progress}%`;
+            document.getElementById('progressText').textContent = `Question ${currentQuestion + 1} of ${quizData.length}`;
+        }
+
+        function calculateResult() {
+            const totalScore = getTotalScore();
+            let recommendedPackage = 'not-ready';
+
+            if (totalScore < 4) {
+                recommendedPackage = 'not-ready';
+            } else if (totalScore <= 8) {
+                const q7 = answers.find(a => a.questionId === 7);
+                recommendedPackage = q7 && ['A', 'B'].includes(q7.selectedValue) ? 'package-1' : 'package-2';
+            } else if (totalScore <= 15) {
+                const q8 = answers.find(a => a.questionId === 8);
+                if (q8?.selectedValue === 'A') recommendedPackage = 'package-1';
+                if (['B', 'C'].includes(q8?.selectedValue)) recommendedPackage = 'package-2';
+                if (q8?.selectedValue === 'D') recommendedPackage = 'package-3';
+            } else {
+                const q1 = answers.find(a => a.questionId === 1);
+                const q8 = answers.find(a => a.questionId === 8);
+                recommendedPackage = q1?.selectedValue === 'D' && q8?.selectedValue === 'D' ? 'package-3' : 'package-2';
+            }
+
+            showResult(recommendedPackage);
+        }
+
+        function showResult(packageType) {
+            document.getElementById('quizContainer').classList.add('hidden');
+            document.getElementById('progressContainer').classList.add('hidden');
+            const resultContainer = document.getElementById('resultContainer');
+            resultContainer.classList.remove('hidden');
+
+            const templates = {
+                'not-ready': getNotReadyResult,
+                'package-1': getPackage1Result,
+                'package-2': getPackage2Result,
+                'package-3': getPackage3Result
+            };
+
+            resultContainer.innerHTML = (templates[packageType] || getNotReadyResult)();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function getObjectionResponse() {
+            if (!userObjection) return '';
+
+            const copy = {
+                results: ["We Get It: You've Been Burned Before", "That's why we include monthly reporting (you see EXACTLY where your money goes) and a 90-day checkpoint: if we're not on track for your lead targets by day 90, we'll extend the next month at 50% off."],
+                commitment: ["6 Months Feels Like a Long Time", "But here's the thing: every client who's stuck with us for 6+ months wishes they'd started sooner. The compound effect of SEO + ads is REAL. We're asking for this commitment because we know it works — not to trap you."],
+                understanding: ["You're Right to Be Concerned", "We don't pretend to know your business better than you. That's why we do a full discovery call BEFORE you pay. If we don't think we can deliver for your specific industry, we'll tell you upfront."],
+                budget: ["Let's Do The Math", "If we get you 20-30 leads/month and you close even 20%, what's each customer worth? If it's $2,000+, you're at breakeven or profitable from month 1. If it's $5,000+, you're 10xing your investment. This isn't an expense — it's a profit center."]
+            };
+
+            const [title, text] = copy[userObjection] || [];
+            if (!title || !text) return '';
+
+            return `<div class="result-section" style="background: rgba(247,147,30,0.08); padding: 1.5rem; border-radius: 12px; border-left: 4px solid var(--nukind-orange);"><h3>${title}</h3><p>${text}</p></div>`;
+        }
+
+        function getNotReadyResult() {
+            const q1 = answers.find(a => a.questionId === 1);
+            const q2 = answers.find(a => a.questionId === 2);
+            const q3 = answers.find(a => a.questionId === 3);
+            let reasonsHTML = '';
+
+            if (q1?.selectedValue === 'A') reasonsHTML += `<p><strong>Revenue Stage:</strong> Your revenue is still building. At this stage, every dollar matters, and a $2,000-3,000/month agency investment would eat too much of your margin.</p>`;
+            if (q2?.selectedValue === 'A') reasonsHTML += `<p><strong>Timeline Expectations:</strong> You're looking for immediate results, but real marketing (especially SEO) takes 6-12 months to compound. Google Ads can work faster, but even that needs 2-3 months to optimize properly.</p>`;
+            if (q3?.selectedValue === 'A') reasonsHTML += `<p><strong>Commitment Readiness:</strong> Marketing isn't a light switch. If you're not ready to commit at least 6 months, you won't see the results that justify the investment.</p>`;
+
+            return `<div class="result-card"><span class="result-badge not-ready">Not Ready Yet</span><h1 class="result-title">You're Not Quite Ready Yet (And That's Okay)</h1><p class="result-subtitle">Based on your answers, you're in the early stage of business growth. Here's the honest truth: hiring a digital marketing agency right now might not be the best use of your money.</p><div class="result-section"><h3>Why?</h3>${reasonsHTML}</div><div class="result-section"><h3>What You Should Do Instead:</h3><div class="result-features"><div class="feature-item"><span class="feature-icon">1.</span><div><strong>Get to $20K+/month in revenue first</strong><br>Focus on referrals, word-of-mouth, local networking. Nail your offer and pricing. Build a basic website (DIY is fine for now).</div></div><div class="feature-item"><span class="feature-icon">2.</span><div><strong>Learn the basics yourself</strong><br>Set up your Google Business Profile (it's free). Post on social media consistently (3x/week minimum). Start creating valuable content.</div></div><div class="feature-item"><span class="feature-icon">3.</span><div><strong>Come back when you're ready</strong><br>We typically work best with businesses doing $30K+/month. When you hit that milestone, let's talk.</div></div></div></div><div style="text-align:center;margin-top:3rem;"><a href="https://nukinddigital.com/contact" class="cta-button">Download Free Marketing Checklist</a><p style="margin-top:1rem;color:var(--text-light);">Get our step-by-step guide for early-stage businesses</p></div></div>`;
+        }
+
+        function getPackage1Result() {
+            return `<div class="result-card"><span class="result-badge package-1">Recommended Package</span><h1 class="result-title">Local Domination</h1><p class="result-subtitle">You need to be the FIRST option when someone in your area searches for what you do.</p><div class="result-section"><h3>Your Diagnosis</h3><p>Based on your answers, you're in the <strong>Visibility Stage</strong>. You're probably relying on referrals or word-of-mouth, which isn't scalable. Your competitors are showing up on Google — you're not.</p><p>You don't need fancy multi-channel campaigns yet. You need to show up when people search for what you do in your area.</p></div><div class="result-section"><h3>What's Included</h3><div class="result-features"><div class="feature-item"><span class="feature-icon">✓</span><div><strong>Google Business Profile optimization</strong> (get ranked #1-3 in the map pack)</div></div><div class="feature-item"><span class="feature-icon">✓</span><div><strong>Local SEO</strong> (rank for "[your service] near me" searches)</div></div><div class="feature-item"><span class="feature-icon">✓</span><div><strong>Google Search Ads</strong> (start getting leads in week 1 while SEO ramps up)</div></div><div class="feature-item"><span class="feature-icon">✓</span><div><strong>High-converting landing page</strong> (turn clicks into calls/forms)</div></div><div class="feature-item"><span class="feature-icon">✓</span><div><strong>Automated follow-up system</strong> (SMS + email so leads don't slip away)</div></div><div class="feature-item"><span class="feature-icon">✓</span><div><strong>Monthly strategy calls</strong> (we review what's working and adjust)</div></div></div></div><div class="pricing-box"><h3 style="margin-bottom:1rem;">Investment</h3><div class="pricing-item"><span>Monthly Fee:</span><span class="pricing-value">$2,200 + GST</span></div><div class="pricing-item"><span>Setup Fee (one-time):</span><span class="pricing-value">$990 + GST</span></div><div class="pricing-item"><span>Ad Spend (separate):</span><span class="pricing-value">$1,500-$3,000/month</span></div><div class="pricing-item"><span>Minimum Term:</span><span class="pricing-value">6 months</span></div></div>${getObjectionResponse()}<div style="text-align:center;margin-top:3rem;"><a href="https://nukinddigital.com/contact" class="cta-button">Book Your Free 15-Min Strategy Call</a></div></div>`;
+        }
+
+        function getPackage2Result() {
+            return `<div class="result-card"><span class="result-badge package-2">Recommended Package</span><h1 class="result-title">Growth Engine</h1><p class="result-subtitle">You're ready to scale. You need a system that generates 30-50 leads/month predictably.</p><div class="result-section"><h3>Your Diagnosis</h3><p>Based on your answers, you're in the <strong>Growth Stage</strong>. Some months you're slammed, others are crickets. You need a REAL marketing system that doesn't depend on hustling or referrals.</p></div><div class="result-section"><h3>What's Included</h3><div class="result-features"><div class="feature-item"><span class="feature-icon">✓</span><div><strong>Full SEO</strong> (national/regional keywords, 2 blogs/month, technical fixes, backlink outreach)</div></div><div class="feature-item"><span class="feature-icon">✓</span><div><strong>Google Ads</strong> (Search + Display, multi-campaign, weekly optimization)</div></div><div class="feature-item"><span class="feature-icon">✓</span><div><strong>Google Business Profile</strong> (advanced management, review gen, competitor tracking)</div></div><div class="feature-item"><span class="feature-icon">✓</span><div><strong>2 high-converting landing pages</strong> (one for ads, one for organic)</div></div><div class="feature-item"><span class="feature-icon">✓</span><div><strong>Advanced automation</strong> (multi-step email + SMS sequences, CRM integration)</div></div></div></div><div class="pricing-box"><h3 style="margin-bottom:1rem;">Investment</h3><div class="pricing-item"><span>Monthly Fee:</span><span class="pricing-value">$3,850 + GST</span></div><div class="pricing-item"><span>Setup Fee (one-time):</span><span class="pricing-value">$1,650 + GST</span></div><div class="pricing-item"><span>Ad Spend (separate):</span><span class="pricing-value">$4,000-$10,000/month</span></div><div class="pricing-item"><span>Minimum Term:</span><span class="pricing-value">6 months (12 for e-commerce)</span></div></div>${getObjectionResponse()}<div style="text-align:center;margin-top:3rem;"><a href="https://nukinddigital.com/contact" class="cta-button">Book Your Free Strategy Call</a></div></div>`;
+        }
+
+        function getPackage3Result() {
+            return `<div class="result-card"><span class="result-badge package-3">Premium Package</span><h1 class="result-title">Market Leader</h1><p class="result-subtitle">You're ready to dominate. You need enterprise-level execution with boutique-level attention.</p><div class="result-section"><h3>Your Diagnosis</h3><p>You're operating at scale and looking to <strong>OWN your market</strong>.</p></div><div class="result-section"><h3>What's Included</h3><div class="result-features"><div class="feature-item"><span class="feature-icon">✓</span><div><strong>Advanced SEO</strong> (national/international, 4 blogs/month, PR-level backlinks)</div></div><div class="feature-item"><span class="feature-icon">✓</span><div><strong>Google Ads</strong> (Search + Display + YouTube + Shopping, full-funnel)</div></div><div class="feature-item"><span class="feature-icon">✓</span><div><strong>Meta Ads</strong> (Facebook + Instagram, creative testing, advanced audiences)</div></div><div class="feature-item"><span class="feature-icon">✓</span><div><strong>Enterprise automation</strong> (CRM integration, multi-touch attribution)</div></div></div></div><div class="pricing-box"><h3 style="margin-bottom:1rem;">Investment</h3><div class="pricing-item"><span>Monthly Fee:</span><span class="pricing-value">$6,500 + GST</span></div><div class="pricing-item"><span>Setup Fee (one-time):</span><span class="pricing-value">$2,750 + GST</span></div><div class="pricing-item"><span>Ad Spend (separate):</span><span class="pricing-value">$15,000+/month</span></div><div class="pricing-item"><span>Minimum Term:</span><span class="pricing-value">12 months</span></div></div>${getObjectionResponse()}<div style="text-align:center;margin-top:3rem;"><a href="https://nukinddigital.com/contact" class="cta-button">Book a 30-Min Strategy Session</a></div></div>`;
+        }
+
+        initQuiz();
+    </script>
+</body>
+</html>
